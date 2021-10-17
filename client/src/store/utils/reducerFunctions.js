@@ -1,5 +1,6 @@
 export const addMessageToStore = (state, payload) => {
-  const { message, sender } = payload;
+  const { message, sender, activeConvId } = payload;
+
   // if sender isn't null, that means the message needs to be put in a brand new convo
   if (sender !== null) {
     const newConvo = {
@@ -8,6 +9,13 @@ export const addMessageToStore = (state, payload) => {
       messages: [message],
     };
     newConvo.latestMessageText = message.text;
+
+    if (message.senderId === newConvo.otherUser.id) {
+      if (activeConvId !== message.conversationId) { //Not same chat board opened
+        newConvo.unreadCount = 1;
+      }
+    }
+
     return [newConvo, ...state];
   }
 
@@ -16,6 +24,13 @@ export const addMessageToStore = (state, payload) => {
       const nextConvo = { ...convo };
       nextConvo.messages.push(message);
       nextConvo.latestMessageText = message.text;
+
+      if (message.senderId === nextConvo.otherUser.id) {
+        if (activeConvId !== message.conversationId) { //Not same chat board opened
+          nextConvo.unreadCount++;
+        }
+      }
+
       return nextConvo;
     } else {
       return convo;
@@ -74,7 +89,18 @@ export const addNewConvoToStore = (state, recipientId, message) => {
       nextConvo.id = message.conversationId;
       nextConvo.messages.push(message);
       nextConvo.latestMessageText = message.text;
+      nextConvo.unreadCount = 1;
       return nextConvo;
+    } else {
+      return convo;
+    }
+  });
+};
+
+export const resetUnreadMessagesInStore = (state, conversationId) => {
+  return state.map((convo) => {
+    if (convo.id === conversationId) {
+      return { ...convo, unreadCount: 0 };
     } else {
       return convo;
     }

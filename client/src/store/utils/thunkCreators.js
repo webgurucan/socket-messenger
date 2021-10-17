@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  removeUnreadFlag,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -89,6 +90,15 @@ const sendMessage = (data, body) => {
     recipientId: body.recipientId,
     sender: data.sender,
   });
+};
+
+export const updateMessagesAsRead = (body) => async (dispatch) => {
+  try {
+    const { data } = await axios.patch("/api/conversations", body);
+    if (data.conversationId) dispatch(removeUnreadFlag(data.conversationId))
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 // message format to send: {recipientId, text, conversationId}
