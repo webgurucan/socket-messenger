@@ -4,6 +4,7 @@ import {
   setNewMessage,
   removeOfflineUser,
   addOnlineUser,
+  setMessageReadStatus,
 } from "./store/conversations";
 
 import { updateMessagesAsRead } from "./store/utils/thunkCreators";
@@ -29,6 +30,15 @@ socket.on("connect", () => {
     //If you open the same conversation panel, you should make the message read.
     if (state.activeConversation.conversationId === data.message.conversationId) {
       store.dispatch(updateMessagesAsRead({ conversationId: data.message.conversationId }));
+    }
+  });
+
+  socket.on("read-message", (data) => {
+    //You got reader's last conversation data
+    let state = store.getState();
+    if (state.activeConversation.conversationId === data.conversationId && state.user.id !== data.readerId) {
+      //You are going to update reader's status on your active chat panel.
+      store.dispatch(setMessageReadStatus(data.conversationId, data.readerId, data.lastViewedMessageId));
     }
   });
 });

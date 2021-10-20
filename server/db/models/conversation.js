@@ -23,16 +23,16 @@ Conversation.findConversation = async function (user1Id, user2Id) {
 };
 
 /**
- * Check if is an existing conversation
+ * Check if you have permission to see the conversation.
  * @returns conversation or null if it doesn't exist
  */
-Conversation.isValid = async function (conversationId, user1Id) {
+Conversation.hasPermission = async function (conversationId, user1Id) {
   
   const conversation = await Conversation.findByPk(conversationId);
   if (conversation?.user1Id !== user1Id && conversation?.user2Id !== user1Id)
-    return;
+    return false;
   
-  return conversation;
+  return true;
 };
 
 

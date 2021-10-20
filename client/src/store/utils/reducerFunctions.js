@@ -106,3 +106,28 @@ export const resetUnreadMessagesInStore = (state, conversationId) => {
     }
   });
 };
+
+
+export const setMessagesAsReadInStore = (state, payload) => {
+  const {conversationId, readerId, lastViewedMessageId} = payload;
+
+  return state.map((convo) => {
+    if (convo.id === conversationId) {
+      let nextConvo = { ...convo };
+      nextConvo.messages = nextConvo.messages.map((message) => {
+        if (message.senderId !== readerId 
+            && message.id <= lastViewedMessageId
+            && !message.isRead) {
+            return {...message, isRead: true};
+        }
+        else {
+          return message;
+        }
+      });
+      return nextConvo;
+
+    } else {
+      return convo;
+    }
+  });
+};

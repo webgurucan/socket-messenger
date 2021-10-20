@@ -5,6 +5,7 @@ import {
   removeOfflineUserFromStore,
   addMessageToStore,
   resetUnreadMessagesInStore,
+  setMessagesAsReadInStore,
 } from "./utils/reducerFunctions";
 
 // ACTIONS
@@ -17,6 +18,7 @@ const SET_SEARCHED_USERS = "SET_SEARCHED_USERS";
 const CLEAR_SEARCHED_USERS = "CLEAR_SEARCHED_USERS";
 const ADD_CONVERSATION = "ADD_CONVERSATION";
 const REMOVE_UNREAD_FLAG = "REMOVE_UNREAD_FLAG";
+const SET_MESSAGES_AS_READ = "SET_MESSAGES_AS_READ";
 
 // ACTION CREATORS
 
@@ -38,6 +40,13 @@ export const removeUnreadFlag = (conversationId) => {
   return {
     type: REMOVE_UNREAD_FLAG,
     conversationId,
+  };
+};
+
+export const setMessageReadStatus = (conversationId, readerId, lastViewedMessageId) => {
+  return {
+    type: SET_MESSAGES_AS_READ,
+    payload: { conversationId, readerId, lastViewedMessageId },
   };
 };
 
@@ -103,6 +112,8 @@ const reducer = (state = [], action) => {
       );
     case REMOVE_UNREAD_FLAG:
       return resetUnreadMessagesInStore(state, action.conversationId);
+	case SET_MESSAGES_AS_READ:
+      return setMessagesAsReadInStore(state, action.payload);
     default:
       return state;
   }

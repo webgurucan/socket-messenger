@@ -92,10 +92,17 @@ const sendMessage = (data, body) => {
   });
 };
 
+const readMessage = (data) => {
+  socket.emit("read-message", data);
+};
+
 export const updateMessagesAsRead = (body) => async (dispatch) => {
   try {
-    const { data } = await axios.patch("/api/conversations", body);
-    if (data.conversationId) dispatch(removeUnreadFlag(data.conversationId))
+    const { data } = await axios.patch("/api/conversations/read", body);
+    if (data.conversationId) {
+      dispatch(removeUnreadFlag(data.conversationId));
+      readMessage(data);
+    }
   } catch (error) {
     console.error(error);
   }

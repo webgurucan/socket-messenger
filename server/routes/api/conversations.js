@@ -58,8 +58,8 @@ router.get("/", async (req, res, next) => {
           senderId: {
             [Op.not]: userId,
           },
-          isRead: false
-        }
+          isRead: false,
+        },
       });
 
       // set a property "otherUser" so that frontend will have easier access
@@ -92,20 +92,21 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-
 //Update unread message as read
-router.patch("/", async (req, res, next) => {
+router.patch("/read", async (req, res, next) => {
   if (!req.user) {
     return res.sendStatus(401);
   }
 
-
-  const senderId = req.user.id;
+  const readerId = req.user.id;
   const { conversationId } = req.body;
 
-  let conversation = await Conversation.isValid(conversationId, senderId);
+  const conversation = await Conversation.hasPermission(
+    conversationId,
+    readerId
+  );
   if (!conversation) {
-    return res.sendStatus(404)
+    return res.sendStatus(403);
   }
 
   await Message.update(
@@ -114,15 +115,31 @@ router.patch("/", async (req, res, next) => {
       where: {
         conversationId: conversationId,
         senderId: {
-          [Op.not]: senderId,
+          [Op.not]: readerId,
         },
-        isRead: false
-      }
+        isRead: false,
+      },
     }
   );
 
-  res.json({ conversationId: conversationId });
+  let lastViewedMessage = await Message.findOne({
+    where: {
+      conversationId: conversationId,
+      senderId: {
+        [Op.not]: readerId,
+      },
+      isRead: true,
+    },
+    order: [
+      ['id', 'DESC'],
+    ]    
+  });
 
+  res.json({ 
+    conversationId: conversationId, 
+    readerId: readerId,
+    lastViewedMessageId: lastViewedMessage?lastViewedMessage.id:0
+  });
 });
 
 module.exports = router;

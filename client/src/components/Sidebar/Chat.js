@@ -26,8 +26,6 @@ const Chat = (props) => {
   const { otherUser } = conversation;
 
   const handleClick = async (conversation) => {
-
-    //Added conversationId, and Username for unread
     await props.setActiveChat({ conversationId: conversation.id, username: conversation.otherUser.username });
     
     //When you click a conversation, you should mark all unread messages as read.
