@@ -5,9 +5,9 @@ import moment from "moment";
 
 const Messages = (props) => {
   const { messages, otherUser, userId } = props;
-  
+
   let readerInfoShownCount = 0;
-  
+
   //Get my last message
   let lastReadMessageIndex = 0;
   messages.forEach((message, index) => {
@@ -15,14 +15,17 @@ const Messages = (props) => {
       lastReadMessageIndex = index;
     }
   });
-  
+
   return (
     <Box>
       {messages.map((message, index) => {
         const time = moment(message.createdAt).format("h:mm");
-        
-        if ((message.senderId === userId && message.isRead === false) || index === lastReadMessageIndex) {
-          readerInfoShownCount ++;
+
+        if (
+          (message.senderId === userId && message.isRead === false) ||
+          index === lastReadMessageIndex
+        ) {
+          readerInfoShownCount++;
         }
 
         return message.senderId === userId ? (

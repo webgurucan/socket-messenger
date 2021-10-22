@@ -109,7 +109,7 @@ router.patch("/read", async (req, res, next) => {
     return res.sendStatus(403);
   }
 
-  await Message.update(
+  let updatedMessages = await Message.update(
     { isRead: true },
     {
       where: {
@@ -119,26 +119,20 @@ router.patch("/read", async (req, res, next) => {
         },
         isRead: false,
       },
+      returning: true,
     }
   );
 
-  let lastViewedMessage = await Message.findOne({
-    where: {
-      conversationId: conversationId,
-      senderId: {
-        [Op.not]: readerId,
-      },
-      isRead: true,
-    },
-    order: [
-      ['id', 'DESC'],
-    ]    
-  });
-
-  res.json({ 
-    conversationId: conversationId, 
-    readerId: readerId,
-    lastViewedMessageId: lastViewedMessage?lastViewedMessage.id:0
+  let lastViewedMessageId = 0;
+  if (Array.isArray(updatedMessages[1]) && updatedMessages[1].length > 0) {
+    updatedMessages[1].reverse();
+    lastViewedMessageId = updatedMessages[1][0].id;
+  }
+  
+  res.json({
+    conversationId,
+    readerId,
+    lastViewedMessageId,
   });
 });
 

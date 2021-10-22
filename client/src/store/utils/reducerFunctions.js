@@ -97,7 +97,7 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const resetUnreadMessagesInStore = (state, conversationId) => {
+export const resetUnreadMessageCount = (state, conversationId) => {
   return state.map((convo) => {
     if (convo.id === conversationId) {
       return { ...convo, unreadCount: 0 };

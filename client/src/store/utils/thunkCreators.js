@@ -5,7 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
-  removeUnreadFlag,
+  resetUnreadBadge,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -100,7 +100,7 @@ export const updateMessagesAsRead = (body) => async (dispatch) => {
   try {
     const { data } = await axios.patch("/api/conversations/read", body);
     if (data.conversationId) {
-      dispatch(removeUnreadFlag(data.conversationId));
+      dispatch(resetUnreadBadge(data.conversationId));
       readMessage(data);
     }
   } catch (error) {

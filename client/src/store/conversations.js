@@ -4,7 +4,7 @@ import {
   addSearchedUsersToStore,
   removeOfflineUserFromStore,
   addMessageToStore,
-  resetUnreadMessagesInStore,
+  resetUnreadMessageCount,
   setMessagesAsReadInStore,
 } from "./utils/reducerFunctions";
 
@@ -17,7 +17,7 @@ const REMOVE_OFFLINE_USER = "REMOVE_OFFLINE_USER";
 const SET_SEARCHED_USERS = "SET_SEARCHED_USERS";
 const CLEAR_SEARCHED_USERS = "CLEAR_SEARCHED_USERS";
 const ADD_CONVERSATION = "ADD_CONVERSATION";
-const REMOVE_UNREAD_FLAG = "REMOVE_UNREAD_FLAG";
+const RESET_UNREAD_MESSAGE_COUNT = "RESET_UNREAD_MESSAGE_COUNT";
 const SET_MESSAGES_AS_READ = "SET_MESSAGES_AS_READ";
 
 // ACTION CREATORS
@@ -32,18 +32,26 @@ export const gotConversations = (conversations) => {
 export const setNewMessage = (message, sender, activeConvId) => {
   return {
     type: SET_MESSAGE,
-    payload: { message, sender: sender || null, activeConvId: activeConvId || null },
+    payload: {
+      message,
+      sender: sender || null,
+      activeConvId: activeConvId || null,
+    },
   };
 };
 
-export const removeUnreadFlag = (conversationId) => {
+export const resetUnreadBadge = (conversationId) => {
   return {
-    type: REMOVE_UNREAD_FLAG,
+    type: RESET_UNREAD_MESSAGE_COUNT,
     conversationId,
   };
 };
 
-export const setMessageReadStatus = (conversationId, readerId, lastViewedMessageId) => {
+export const setMessageReadStatus = (
+  conversationId,
+  readerId,
+  lastViewedMessageId
+) => {
   return {
     type: SET_MESSAGES_AS_READ,
     payload: { conversationId, readerId, lastViewedMessageId },
@@ -85,7 +93,6 @@ export const addConversation = (recipientId, newMessage) => {
   };
 };
 
-
 // REDUCER
 
 const reducer = (state = [], action) => {
@@ -110,9 +117,9 @@ const reducer = (state = [], action) => {
         action.payload.recipientId,
         action.payload.newMessage
       );
-    case REMOVE_UNREAD_FLAG:
-      return resetUnreadMessagesInStore(state, action.conversationId);
-	case SET_MESSAGES_AS_READ:
+    case RESET_UNREAD_MESSAGE_COUNT:
+      return resetUnreadMessageCount(state, action.conversationId);
+    case SET_MESSAGES_AS_READ:
       return setMessagesAsReadInStore(state, action.payload);
     default:
       return state;
