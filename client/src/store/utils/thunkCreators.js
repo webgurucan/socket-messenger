@@ -5,6 +5,7 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  resetUnreadBadge,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -89,6 +90,22 @@ const sendMessage = (data, body) => {
     recipientId: body.recipientId,
     sender: data.sender,
   });
+};
+
+const readMessage = (data) => {
+  socket.emit("read-message", data);
+};
+
+export const updateMessagesAsRead = (body) => async (dispatch) => {
+  try {
+    const { data } = await axios.patch("/api/conversations/read", body);
+    if (data.conversationId) {
+      dispatch(resetUnreadBadge(data.conversationId));
+      readMessage(data);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 // message format to send: {recipientId, text, conversationId}

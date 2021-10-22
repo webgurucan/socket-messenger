@@ -51,6 +51,17 @@ router.get("/", async (req, res, next) => {
       const convo = conversations[i];
       const convoJSON = convo.toJSON();
 
+      //Count unread messages
+      convoJSON.unreadCount = await Message.count({
+        where: {
+          conversationId: convo.id,
+          senderId: {
+            [Op.not]: userId,
+          },
+          isRead: false,
+        },
+      });
+
       // set a property "otherUser" so that frontend will have easier access
       if (convoJSON.user1) {
         convoJSON.otherUser = convoJSON.user1;
@@ -69,8 +80,8 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
-	  
-	  //To show oldest first
+
+      //To show oldest first
       convoJSON.messages.reverse();
       conversations[i] = convoJSON;
     }
@@ -79,6 +90,50 @@ router.get("/", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+//Update unread message as read
+router.patch("/read", async (req, res, next) => {
+  if (!req.user) {
+    return res.sendStatus(401);
+  }
+
+  const readerId = req.user.id;
+  const { conversationId } = req.body;
+
+  const conversation = await Conversation.hasPermission(
+    conversationId,
+    readerId
+  );
+  if (!conversation) {
+    return res.sendStatus(403);
+  }
+
+  let updatedMessages = await Message.update(
+    { isRead: true },
+    {
+      where: {
+        conversationId: conversationId,
+        senderId: {
+          [Op.not]: readerId,
+        },
+        isRead: false,
+      },
+      returning: true,
+    }
+  );
+
+  let lastViewedMessageId = 0;
+  if (Array.isArray(updatedMessages[1]) && updatedMessages[1].length > 0) {
+    updatedMessages[1].reverse();
+    lastViewedMessageId = updatedMessages[1][0].id;
+  }
+  
+  res.json({
+    conversationId,
+    readerId,
+    lastViewedMessageId,
+  });
 });
 
 module.exports = router;

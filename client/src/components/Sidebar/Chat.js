@@ -4,6 +4,7 @@ import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
+import { updateMessagesAsRead } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,7 +26,10 @@ const Chat = (props) => {
   const { otherUser } = conversation;
 
   const handleClick = async (conversation) => {
-    await props.setActiveChat(conversation.otherUser.username);
+    await props.setActiveChat({ conversationId: conversation.id, username: conversation.otherUser.username });
+    
+    //When you click a conversation, you should mark all unread messages as read.
+    await props.updateMessagesAsRead(conversation.id);
   };
 
   return (
@@ -43,8 +47,11 @@ const Chat = (props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setActiveChat: (id) => {
-      dispatch(setActiveChat(id));
+    setActiveChat: (convData) => {
+      dispatch(setActiveChat(convData));
+    },
+    updateMessagesAsRead: (conversationId) => {
+      dispatch(updateMessagesAsRead({ conversationId: conversationId }));
     }
   };
 };
